@@ -1,8 +1,9 @@
+
 # 📦 0-1 Knapsack Problem: Brute Force vs Dynamic Programming
 
 ## 🧠 Overview
 
-This project compares three algorithmic approaches to solving the **0-1 Knapsack Problem**:
+This project compares three algorithmic approaches to solving the classic **0-1 Knapsack Problem**:
 
 1. 🪓 **Brute Force** (Recursive, exponential time)
 2. 📚 **Top-Down Dynamic Programming** (Memoization)
@@ -14,35 +15,61 @@ It measures and visualizes their runtime performance as the number of items incr
 
 ## 💼 Problem Statement
 
-Given a list of item weights and values, and a total weight capacity `W`, determine the maximum value that can be carried in the knapsack. Each item can either be included **once** or not at all.
+You are given `n` items where each item has a **weight** and a **profit**. You are also given a bag with a weight capacity `W`.
+
+**Goal:** Select a subset of the items to include in the bag such that:
+- The total weight does **not exceed `W`**
+- The total profit is **maximized**
+- Items **cannot be broken** — either take the whole item or leave it
+
+### ✅ Example 1:
+```python
+W = 4
+profit = [1, 2, 3]
+weight = [4, 5, 1]
+```
+**Output:** `3`
+
+➡️ Best choice is item 3 (weight = 1, profit = 3)
+
+### ✅ Example 2:
+```python
+W = 3
+profit = [1, 2, 3]
+weight = [4, 5, 6]
+```
+**Output:** `0`
+
+➡️ No items can fit into the bag.
 
 ---
 
-## 🧪 Algorithms Used
+## 🧪 Algorithms Compared
 
 | Method             | Time Complexity | Space Complexity | Notes |
 |--------------------|-----------------|------------------|-------|
-| Brute Force        | O(2ⁿ)           | O(n)             | Slow but easy to implement |
-| Top-Down DP        | O(n×W)          | O(n×W)           | Recursive with memoization |
-| Bottom-Up DP       | O(n×W)          | O(n×W)           | Iterative, avoids recursion |
+| Brute Force        | O(2ⁿ)           | O(n)             | Very slow for large `n` |
+| Top-Down DP        | O(n×W)          | O(n×W)           | Efficient with recursion |
+| Bottom-Up DP       | O(n×W)          | O(n×W)           | Efficient and iterative |
 
 ---
 
 ## 🛠️ How It Works
 
-- Generates **random weights and values** for up to 15 items.
-- Tests each algorithm for increasing values of `n` (number of items).
-- Measures execution time for each method using `time.perf_counter()`.
-- Plots a line graph comparing runtimes using `matplotlib`.
+- Random weights and profits are generated for up to 15 items.
+- Each of the three methods is tested on increasing values of `n`.
+- Execution time is measured and compared using `matplotlib`.
 
 ---
 
 ## 📈 Visualization
 
-The resulting graph shows how each algorithm scales as the number of items increases.
+A line graph is plotted:
 
-- **Brute Force** grows quickly (exponential).
-- **Top-Down DP** and **Bottom-Up DP** perform much faster and scale efficiently.
+- **X-axis:** Number of items
+- **Y-axis:** Time taken (seconds)
+
+This demonstrates how each algorithm scales with input size.
 
 ---
 
@@ -58,3 +85,12 @@ The resulting graph shows how each algorithm scales as the number of items incre
 1. **Install dependencies**:
    ```bash
    pip install matplotlib
+   ```
+
+2. **Run the script**:
+   ```bash
+   python Knapsack.py
+   ```
+
+3. **See the graph**: Matplotlib will display a runtime comparison chart.
+
