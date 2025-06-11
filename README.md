@@ -1,5 +1,4 @@
-
-# 📦 0-1 Knapsack Problem: Brute Force vs Dynamic Programming
+# 📦 Knapsack Problem: Brute Force vs Dynamic Programming
 
 ## 🧠 Overview
 
