@@ -2,52 +2,58 @@ import time
 import matplotlib.pyplot as plt
 import random
 
-# Brute Force Approach (Recursive)
-def brute_force_knapsack(W, wt, val, n):
-    def recurse(i, w):
-        if i == n or w == 0:
-            return 0
-        if wt[i] > w:
-            return recurse(i + 1, w)
-        else:
-            return max(val[i] + recurse(i + 1, w - wt[i]), recurse(i + 1, w))
-    return recurse(0, W)
+# Recursive (Brute Force) Approach
+def knapsackRec(W, val, wt, n):
+    if n == 0 or W == 0:
+        return 0
+    pick = 0
+    if wt[n - 1] <= W:
+        pick = val[n - 1] + knapsackRec(W - wt[n - 1], val, wt, n - 1)
+    notPick = knapsackRec(W, val, wt, n - 1)
+    return max(pick, notPick)
+
+def knapsack_brute_force(W, val, wt):
+    n = len(val)
+    return knapsackRec(W, val, wt, n)
 
 # Dynamic Programming (Top-Down with Memoization)
-def dp_top_down_knapsack(W, wt, val, n):
-    dp = [[-1] * (W + 1) for _ in range(n + 1)]
-    def recurse(i, w):
-        if w == 0 or i == n:
-            return 0
-        if dp[i][w] != -1:
-            return dp[i][w]
-        if wt[i] > w:
-            dp[i][w] = recurse(i + 1, w)
-        else:
-            dp[i][w] = max(val[i] + recurse(i + 1, w - wt[i]), recurse(i + 1, w))
-        return dp[i][w]
-    return recurse(0, W)
+def knapsackRec_memo(W, val, wt, n, memo):
+    if n == 0 or W == 0:
+        return 0
+    if memo[n][W] != -1:
+        return memo[n][W]
+    pick = 0
+    if wt[n - 1] <= W:
+        pick = val[n - 1] + knapsackRec_memo(W - wt[n - 1], val, wt, n - 1, memo)
+    notPick = knapsackRec_memo(W, val, wt, n - 1, memo)
+    memo[n][W] = max(pick, notPick)
+    return memo[n][W]
 
-# Dynamic Programming (Bottom-Up with Tabulation)
-def dp_bottom_up_knapsack(W, wt, val, n):
-    K = [[0 for _ in range(W + 1)] for _ in range(n + 1)]
-    for i in range(1, n + 1):
-        for w in range(1, W + 1):
-            if wt[i - 1] > w:
-                K[i][w] = K[i - 1][w]
-            else:
-                K[i][w] = max(val[i - 1] + K[i - 1][w - wt[i - 1]], K[i - 1][w])
-    return K[n][W]
+def knapsack_top_down(W, val, wt):
+    n = len(val)
+    memo = [[-1] * (W + 1) for _ in range(n + 1)]
+    return knapsackRec_memo(W, val, wt, n, memo)
+
+# Dynamic Programming (Bottom-Up with Space Optimization)
+def knapsack_bottom_up(W, val, wt):
+    n = len(wt)
+    dp = [0] * (W + 1)  # 1D array
+    for i in range(n):
+        # Iterate in reverse to avoid overwriting needed values
+        for j in range(W, wt[i] - 1, -1):
+            dp[j] = max(dp[j], val[i] + dp[j - wt[i]])
+    return dp[W]
 
 # Main Program
 if __name__ == "__main__":
-    random.seed(42)  
-    W = 100  # Knapsack capacity
-    max_n = 15  # Maximum number of items
-    wt = [random.randint(1, 50) for _ in range(max_n)]  
-    val = [random.randint(1, 100) for _ in range(max_n)]  
+    random.seed(42)  # For reproducibility
+    W = 500  # Increased knapsack capacity
+    max_n = 50  # Increased to observe scaling
+    wt = [random.randint(1, 250) for _ in range(max_n)]  
+    val = [random.randint(1, 500) for _ in range(max_n)]  
 
-    ns = list(range(5, 16, 2))  # [5, 7, 9, 11, 13, 15]
+    ns = list(range(10, max_n + 1, 10))  # [10, 20, 30, 40, 50]
+    num_trials = 5  # Number of trials to average out noise
     brute_times = []
     top_down_times = []
     bottom_up_times = []
@@ -56,24 +62,52 @@ if __name__ == "__main__":
         wt_n = wt[:n]
         val_n = val[:n]
         
-        start = time.perf_counter()
-        brute_force_knapsack(W, wt_n, val_n, n)
-        brute_times.append(time.perf_counter() - start)
+        # Brute force timing (skip for large n to save time)
+        brute_total = 0
+        if n <= 20:  # Limit brute force to smaller n
+            for _ in range(num_trials):
+                start = time.perf_counter()
+                knapsack_brute_force(W, val_n, wt_n)
+                brute_total += time.perf_counter() - start
+            brute_avg = brute_total / num_trials
+        else:
+            brute_avg = float('inf')  # Placeholder for large n
+        brute_times.append(brute_avg)
         
-        start = time.perf_counter()
-        dp_top_down_knapsack(W, wt_n, val_n, n)
-        top_down_times.append(time.perf_counter() - start)
+        # Top-down timing
+        top_down_total = 0
+        for _ in range(num_trials):
+            start = time.perf_counter()
+            knapsack_top_down(W, val_n, wt_n)
+            top_down_total += time.perf_counter() - start
+        top_down_avg = top_down_total / num_trials
+        top_down_times.append(top_down_avg)
         
-        start = time.perf_counter()
-        dp_bottom_up_knapsack(W, wt_n, val_n, n)
-        bottom_up_times.append(time.perf_counter() - start)
+        # Bottom-up timing
+        bottom_up_total = 0
+        for _ in range(num_trials):
+            start = time.perf_counter()
+            knapsack_bottom_up(W, val_n, wt_n)
+            bottom_up_total += time.perf_counter() - start
+        bottom_up_avg = bottom_up_total / num_trials
+        bottom_up_times.append(bottom_up_avg)
 
-    plt.plot(ns, brute_times, label='Brute Force', marker='o')
+        # Print times for this n
+        print(f"\nNumber of items (n={n}):")
+        print(f"  Brute Force: {brute_avg:.6f} seconds" if n <= 20 else "  Brute Force: Skipped (too slow)")
+        print(f"  Top-Down DP: {top_down_avg:.6f} seconds")
+        print(f"  Bottom-Up DP: {bottom_up_avg:.6f} seconds")
+
+    # Plotting the results
     plt.plot(ns, top_down_times, label='DP Top-Down', marker='s')
     plt.plot(ns, bottom_up_times, label='DP Bottom-Up', marker='^')
-    plt.xlabel('Number of items (n)')
-    plt.ylabel('Time (s)')
-    plt.title('Time Complexity Comparison for 0-1 Knapsack')
+    if any(t != float('inf') for t in brute_times):
+        plt.plot([n for n, t in zip(ns, brute_times) if t != float('inf')], 
+                 [t for t in brute_times if t != float('inf')], 
+                 label='Brute Force', marker='o')
+    plt.xlabel('Number of Items (n)')
+    plt.ylabel('Time (seconds)')
+    plt.title('Time Complexity Comparison for 0-1 Knapsack (W=500)')
     plt.legend()
     plt.grid(True)
     plt.show()
